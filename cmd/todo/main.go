@@ -18,4 +18,18 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+	// Decide what to do based on the number of arguments provided
+	switch {
+	case len(os.Args) == 1:
+		// check if there's anything in the List of todo items
+		// before looping through each item and then printing it out
+		if len(*l) <= 0 {
+			fmt.Println("You have no to do items")
+			os.Exit(0)
+		}
+		for _, item := range *l {
+			fmt.Println(item.Task)
+		}
+	}
 }
