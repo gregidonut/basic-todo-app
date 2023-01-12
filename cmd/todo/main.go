@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gregidonut/basic_todo_app"
 	"os"
+	"strings"
 )
 
 // temporarily hard-coding file name here
@@ -30,6 +31,16 @@ func main() {
 		}
 		for _, item := range *l {
 			fmt.Println(item.Task)
+		}
+	// Concatenate all provided arguments with a space and
+	// add to the list as an item
+	default:
+		item := strings.Join(os.Args[1:], " ")
+		l.Add(item)
+		err := l.Save(todoFileName)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
 	}
 }
