@@ -142,6 +142,8 @@ func TestList_SaveGet(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		// here we create 2 Lists save one on a temp file then load it on the second one
+		// with the get function. then we check if their contents if both Lists are the same.
 		t.Run(tt.name, func(t *testing.T) {
 			tt.l1.Add(tt.args.taskName)
 			// check to see if first task in List 1 is equal to the task name as a sanity check
