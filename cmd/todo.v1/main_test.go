@@ -90,7 +90,7 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		want := fmt.Sprintf("%s\n%s\n", task1, task2)
+		want := fmt.Sprintf(" 1: %s\n 2: %s\n", task1, task2)
 		if want != string(out) {
 			t.Errorf("want %q, got %q", want, string(out))
 		}
@@ -104,7 +104,7 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
-	// this should only output one task == task2, since whe 'completed' task1
+	// this should output an X prefix on task number 1
 	t.Run("ListTasksByRunningWithoutFlags", func(t *testing.T) {
 		// Execute command with no arguments
 		cmd := exec.Command(cmdPath)
@@ -113,7 +113,7 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		want := fmt.Sprintf("%s\n", task2)
+		want := fmt.Sprintf("X 1: %s\n 2: %s\n", task1, task2)
 		if want != string(out) {
 			t.Errorf("want %q, got %q", want, string(out))
 		}
