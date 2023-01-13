@@ -81,9 +81,5 @@ func listToDoItems(l *basic_todo_app.List) {
 		fmt.Println("You have no to do items")
 		os.Exit(0)
 	}
-	for _, item := range *l {
-		if !item.Done {
-			fmt.Println(item.Task)
-		}
-	}
+	fmt.Print(l)
 }
