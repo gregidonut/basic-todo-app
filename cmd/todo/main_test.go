@@ -54,6 +54,19 @@ func TestTodoCLI(t *testing.T) {
 
 	cmdPath := filepath.Join(dir, binName)
 
+	t.Run("ListTasksWithoutYetSettingUpTheFile", func(t *testing.T) {
+		cmd := exec.Command(cmdPath)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := "You have no to do items\n"
+		if want != string(out) {
+			t.Errorf("want %q, got %q", want, string(out))
+		}
+	})
+
 	t.Run("AddNewTask", func(t *testing.T) {
 		// Execute command with split string from task variable
 		// to simulate multiple arguments
@@ -78,4 +91,3 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 }
-n
