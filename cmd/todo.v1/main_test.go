@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -45,7 +44,8 @@ func TestMain(m *testing.M) {
 // attempts to add a task, then compares the added to task to output of
 // running the binary without arguments
 func TestTodoCLI(t *testing.T) {
-	task := "test task number 1"
+	task1 := "test task number 1"
+	task2 := "test task number 2"
 
 	dir, err := os.Getwd()
 	if err != nil {
@@ -68,16 +68,44 @@ func TestTodoCLI(t *testing.T) {
 	})
 
 	t.Run("AddNewTask", func(t *testing.T) {
-		// Execute command with split string from task variable
+		// Execute command with split string from task1 variable
 		// to simulate multiple arguments
-		cmd := exec.Command(cmdPath, strings.Split(task, " ")...)
+		cmd := exec.Command(cmdPath, "-task", task1)
 		err := cmd.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		cmd = exec.Command(cmdPath, "-task", task2)
+		err = cmd.Run()
 		if err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	t.Run("ListTasks", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := fmt.Sprintf("%s\n%s\n", task1, task2)
+		if want != string(out) {
+			t.Errorf("want %q, got %q", want, string(out))
+		}
+	})
+
+	t.Run("CompleteTask", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-complete", "1")
+		err := cmd.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	// this should only output one task == task2, since whe 'completed' task1
+	t.Run("ListTasksByRunningWithoutFlags", func(t *testing.T) {
 		// Execute command with no arguments
 		cmd := exec.Command(cmdPath)
 		out, err := cmd.CombinedOutput()
@@ -85,7 +113,7 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		want := task + "\n"
+		want := fmt.Sprintf("%s\n", task2)
 		if want != string(out) {
 			t.Errorf("want %q, got %q", want, string(out))
 		}
