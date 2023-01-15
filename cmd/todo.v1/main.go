@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"github.com/gregidonut/basic_todo_app"
+	"io"
 	"os"
+	"strings"
 )
 
 // Default file name
@@ -17,10 +20,12 @@ func main() {
 	}
 
 	// Parsing command line flags
-	task := flag.String("task", "", "Task to be included in the ToDo list")
-	// this flag doesn't need to return val since we will use container to
+
+	// these two flag doesn't need to return val since we will use container to
 	// usedFlag map to check for presence which is already a bool
+	flag.Bool("add", false, "Task to be included in the ToDo list")
 	flag.Bool("list", false, "List all tasks")
+
 	complete := flag.Int("complete", 0, "Item to be completed")
 
 	flag.Parse()
@@ -60,10 +65,18 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-	case usedFlag["task"]:
-		l.Add(*task)
+	case usedFlag["add"]:
+		// When any arguments (excluding flags) are provided, they will be
+		// used as the new task
+		task, err := getTask(os.Stdin, flag.Args()...)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 
-		err := l.Save(todoFileName)
+		l.Add(task)
+
+		err = l.Save(todoFileName)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -87,4 +100,26 @@ func listToDoItems(l *basic_todo_app.List) {
 		os.Exit(0)
 	}
 	fmt.Print(l)
+}
+
+// getTask function decides where to get the description for a new task
+// from: arguments or STDIN
+func getTask(r io.Reader, args ...string) (string, error) {
+	if len(args) > 0 {
+		return strings.Join(args, " "), nil
+	}
+
+	s := bufio.NewScanner(r)
+	s.Scan()
+
+	err := s.Err()
+	if err != nil {
+		return "", err
+	}
+
+	if len(s.Text()) == 0 {
+		return "", fmt.Errorf("Task cannot be blank\n")
+	}
+
+	return s.Text(), nil
 }
