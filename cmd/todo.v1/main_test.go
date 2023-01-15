@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -116,6 +117,45 @@ func TestTodoCLI(t *testing.T) {
 		want := fmt.Sprintf("X 1: %s\n 2: %s\n", task1, task2)
 		if want != string(out) {
 			t.Errorf("want %q, got %q", want, string(out))
+		}
+	})
+
+	t.Run("RunAppWithEnvVarTODO_FILENAME", func(t *testing.T) {
+		const TODO_FILENAME = "new-todo.json"
+
+		err := os.Setenv("TODO_FILENAME", TODO_FILENAME)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		cmd := exec.Command(cmdPath, "-task", task1)
+		err = cmd.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// check if the filepath for the json was created
+		todoFilePath := filepath.Join(dir, TODO_FILENAME)
+		_, err = os.Stat(todoFilePath)
+		if errors.Is(err, os.ErrNotExist) {
+			t.Fatal("todo file path was not created")
+		}
+
+		cmd = exec.Command(cmdPath, "-list")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := fmt.Sprintf(" 1: %s\n", task1)
+		if want != string(out) {
+			t.Errorf("want %q, got %q", want, string(out))
+		}
+
+		// cleanup of json file
+		_, err = os.Stat(todoFilePath)
+		if err == nil {
+			os.Remove(todoFilePath)
 		}
 	})
 }
