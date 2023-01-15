@@ -27,6 +27,7 @@ func main() {
 	flag.Bool("list", false, "List all tasks")
 
 	complete := flag.Int("complete", 0, "Item to be completed")
+	deletedItem := flag.Int("del", 0, "Item to be deleted")
 
 	flag.Parse()
 
@@ -76,6 +77,25 @@ func main() {
 
 		l.Add(task)
 
+		err = l.Save(todoFileName)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	case usedFlag["del"]:
+		// deleted the given item
+		derefList := *l
+		itemToBeDeleted := derefList[*deletedItem-1].Task
+
+		err := l.Delete(*deletedItem)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Deleted task number %d: %s\n", *deletedItem, itemToBeDeleted)
+
+		// Save the new list
 		err = l.Save(todoFileName)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
