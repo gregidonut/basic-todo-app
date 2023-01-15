@@ -41,7 +41,7 @@ func main() {
 	switch {
 	case usedFlag["list"]:
 		listToDoItems(l)
-	case usedFlag["completed"]:
+	case usedFlag["complete"]:
 		// Complete the given item
 		err := l.Complete(*complete)
 		if err != nil {
