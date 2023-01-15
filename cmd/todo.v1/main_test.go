@@ -3,10 +3,12 @@ package main_test
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -68,16 +70,24 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
-	t.Run("AddNewTask", func(t *testing.T) {
-		// Execute command with split string from task1 variable
-		// to simulate multiple arguments
-		cmd := exec.Command(cmdPath, "-task", task1)
+	t.Run("AddNewTaskFromArguemnts", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add", task1)
 		err := cmd.Run()
 		if err != nil {
 			t.Fatal(err)
 		}
+	})
 
-		cmd = exec.Command(cmdPath, "-task", task2)
+	t.Run("AddNewTaskFromSTDIN", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add")
+		cmdStdIn, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		io.WriteString(cmdStdIn, task2)
+		cmdStdIn.Close()
+
 		err = cmd.Run()
 		if err != nil {
 			t.Fatal(err)
@@ -128,7 +138,11 @@ func TestTodoCLI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		cmd := exec.Command(cmdPath, "-task", task1)
+		// testing if running with multiple arguments also works
+		flagsPlusArgs := []string{"-add"}
+		flagsPlusArgs = append(flagsPlusArgs, strings.Split(task1, " ")...)
+
+		cmd := exec.Command(cmdPath, flagsPlusArgs...)
 		err = cmd.Run()
 		if err != nil {
 			t.Fatal(err)
