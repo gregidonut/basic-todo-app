@@ -21,7 +21,7 @@ func main() {
 
 	// Parsing command line flags
 
-	// these two flag doesn't need to return val since we will use container to
+	// these flags doesn't need to return val since we will use container to
 	// usedFlag map to check for presence which is already a bool
 	flag.Bool("add", false, "Task to be included in the ToDo list")
 	flag.Bool("list", false, "List all tasks")
