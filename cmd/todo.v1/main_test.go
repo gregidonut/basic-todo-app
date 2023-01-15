@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 var (
@@ -49,6 +50,9 @@ func TestMain(m *testing.M) {
 func TestTodoCLI(t *testing.T) {
 	task1 := "test task number 1"
 	task2 := "test task number 2"
+	// empty strings to hold formatted time info
+	task2CreationTime := ""
+	task1DoneTimeTime := ""
 
 	dir, err := os.Getwd()
 	if err != nil {
@@ -71,6 +75,7 @@ func TestTodoCLI(t *testing.T) {
 	})
 
 	t.Run("AddNewTaskFromArguemnts", func(t *testing.T) {
+
 		cmd := exec.Command(cmdPath, "-add", task1)
 		err := cmd.Run()
 		if err != nil {
@@ -79,6 +84,8 @@ func TestTodoCLI(t *testing.T) {
 	})
 
 	t.Run("AddNewTaskFromSTDIN", func(t *testing.T) {
+		task2CreationTime = time.Now().Format("Mon, 02 Jan 2006 3:04PM")
+
 		cmd := exec.Command(cmdPath, "-add")
 		cmdStdIn, err := cmd.StdinPipe()
 		if err != nil {
@@ -108,6 +115,8 @@ func TestTodoCLI(t *testing.T) {
 	})
 
 	t.Run("CompleteTask", func(t *testing.T) {
+		task1DoneTimeTime = time.Now().Format("Mon, 02 Jan 2006 3:04PM")
+
 		cmd := exec.Command(cmdPath, "-complete", "1")
 		err := cmd.Run()
 		if err != nil {
@@ -127,6 +136,32 @@ func TestTodoCLI(t *testing.T) {
 		want := fmt.Sprintf("X 1: %s\n 2: %s\n", task1, task2)
 		if want != string(out) {
 			t.Errorf("want %q, got %q", want, string(out))
+		}
+	})
+
+	t.Run("ListVerbose", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list", "-verbose")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := fmt.Sprintf("X 1: Completed at %s : %s\n 2: Created at %s: %s\n",
+			task1DoneTimeTime, task1, task2CreationTime, task2)
+		if want != string(out) {
+			t.Errorf("\n\t\twant\t %q,\n\t\tgot\t\t %q", want, string(out))
+		}
+	})
+
+	t.Run("VerboseWithoutList", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-verbose")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+		want := fmt.Sprintf("X 1: Completed at %s : %s\n 2: Created at %s: %s\n",
+			task1DoneTimeTime, task1, task2CreationTime, task2)
+		if want != string(out) {
+			t.Errorf("\n\t\twant\t %q,\n\t\tgot\t\t %q", want, string(out))
 		}
 	})
 
