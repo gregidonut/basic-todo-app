@@ -130,6 +130,21 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
+	// at this point there should be two items in the list
+	t.Run("DeleteTask", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-del", "1")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(string(out))
+			t.Fatal(err)
+		}
+
+		want := fmt.Sprintf("Deleted task number 1: %s\n", task1)
+		if want != string(out) {
+			t.Errorf("want %q, got %q", want, string(out))
+		}
+	})
+
 	t.Run("RunAppWithEnvVarTODO_FILENAME", func(t *testing.T) {
 		const TODO_FILENAME = "new-todo.json"
 
