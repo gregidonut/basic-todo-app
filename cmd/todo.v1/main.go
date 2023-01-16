@@ -26,6 +26,7 @@ func main() {
 	flag.Bool("add", false, "Task to be included in the ToDo list")
 	flag.Bool("list", false, "List all tasks")
 	flag.Bool("verbose", false, "shows completed or created date")
+	flag.Bool("no-complete", false, "prevents showing of completed items")
 
 	complete := flag.Int("complete", 0, "Item to be completed")
 	deletedItem := flag.Int("del", 0, "Item to be deleted")
@@ -52,7 +53,7 @@ func main() {
 	// Decide what to do based on the flag used
 	switch {
 	case usedFlag["list"]:
-		listToDoItems(l, usedFlag["verbose"])
+		listToDoItems(l, usedFlag["verbose"], usedFlag["no-complete"])
 	case usedFlag["complete"]:
 		// Complete the given item
 		err := l.Complete(*complete)
@@ -103,10 +104,12 @@ func main() {
 			os.Exit(1)
 		}
 	case usedFlag["verbose"]:
-		listToDoItems(l, true)
+		listToDoItems(l, true, usedFlag["no-complete"])
+	case usedFlag["no-complete"]:
+		listToDoItems(l, usedFlag["verbose"], true)
 	case len(os.Args) == 1:
 		// no arguments provided
-		listToDoItems(l, false)
+		listToDoItems(l, false, false)
 	default:
 		// Invalid flag provided
 		fmt.Fprintln(os.Stderr, "Invalid option")
@@ -116,7 +119,7 @@ func main() {
 
 // extracting this logic to make switch statement more readable
 // by minimizing indents
-func listToDoItems(l *basic_todo_app.List, verbose bool) {
+func listToDoItems(l *basic_todo_app.List, verbose, noComplete bool) {
 	// List current to do items if itemsList is not empty
 	if len(*l) <= 0 {
 		fmt.Println("You have no to do items")
