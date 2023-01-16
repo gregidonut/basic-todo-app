@@ -125,25 +125,40 @@ func listToDoItems(l *basic_todo_app.List, verbose, noComplete bool) {
 		fmt.Println("You have no to do items")
 		os.Exit(0)
 	}
+	formattedSlice := make([]string, 0)
+
 	if verbose {
-		formatted := ""
 		for k, t := range *l {
 			prefix := " "
 			if t.Done {
+				if noComplete {
+					continue
+				}
 				prefix = "X "
-				formatted += fmt.Sprintf("%s%d: Completed at %s : %s\n",
-					prefix, k+1, t.CompletedAt.Format("Mon, 02 Jan 2006 3:04PM"), t.Task)
+				formattedSlice = append(formattedSlice, fmt.Sprintf("%s%d: Completed at %s : %s\n",
+					prefix, k+1, t.CompletedAt.Format("Mon, 02 Jan 2006 3:04PM"), t.Task))
 				continue
 			}
-			formatted += fmt.Sprintf("%s%d: Created at %s: %s\n",
-				prefix, k+1, t.CreatedAt.Format("Mon, 02 Jan 2006 3:04PM"), t.Task)
+			formattedSlice = append(formattedSlice, fmt.Sprintf("%s%d: Created at %s: %s\n",
+				prefix, k+1, t.CreatedAt.Format("Mon, 02 Jan 2006 3:04PM"), t.Task))
 		}
 
-		fmt.Print(formatted)
+		fmt.Print(strings.Join(formattedSlice, ""))
 		return
 	}
+	for k, t := range *l {
+		prefix := " "
+		if t.Done {
+			if noComplete {
+				continue
+			}
+			prefix = "X "
+		}
 
-	fmt.Print(l)
+		// Adjust the item number k to print numbers starting from 1
+		formattedSlice = append(formattedSlice, fmt.Sprintf("%s%d: %s\n", prefix, k+1, t.Task))
+	}
+	fmt.Print(strings.Join(formattedSlice, ""))
 }
 
 // getTask function decides where to get the description for a new task
