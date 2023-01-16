@@ -101,6 +101,26 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
+	t.Run("AddBlankTaskFromSTDIN", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-add")
+		cmdStdIn, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		io.WriteString(cmdStdIn, "")
+		cmdStdIn.Close()
+
+		out, err := cmd.CombinedOutput()
+		want := "task cannot be blank\n"
+		if want != string(out) {
+			t.Errorf("want %q, got %q", want, string(out))
+		}
+		if err == nil {
+			t.Errorf("expected error but didn't get one")
+		}
+	})
+
 	t.Run("ListTasks", func(t *testing.T) {
 		cmd := exec.Command(cmdPath, "-list")
 		out, err := cmd.CombinedOutput()
