@@ -166,6 +166,59 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
+	t.Run("NoCompletedTasksByItself", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-no-complete")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(string(out))
+			t.Fatal(err)
+		}
+		want := fmt.Sprintf(" 2: %s\n", task2)
+		if want != string(out) {
+			t.Errorf("\n\t\twant\t %q,\n\t\tgot\t\t %q", want, string(out))
+		}
+	})
+
+	t.Run("NoCompletedTasksWithList", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list", "-no-complete")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(string(out))
+			t.Fatal(err)
+		}
+		want := fmt.Sprintf(" 2: %s\n", task2)
+		if want != string(out) {
+			t.Errorf("\n\t\twant\t %q,\n\t\tgot\t\t %q", want, string(out))
+		}
+	})
+
+	t.Run("NoCompletedTasksWithVerbose", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-verbose", "-no-complete")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(string(out))
+			t.Fatal(err)
+		}
+		want := fmt.Sprintf(" 2: Created at %s: %s\n",
+			task2CreationTime, task2)
+		if want != string(out) {
+			t.Errorf("\n\t\twant\t %q,\n\t\tgot\t\t %q", want, string(out))
+		}
+	})
+
+	t.Run("NoCompletedTasksWithListAndVerbose", func(t *testing.T) {
+		cmd := exec.Command(cmdPath, "-list", "-verbose", "-no-complete")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(string(out))
+			t.Fatal(err)
+		}
+		want := fmt.Sprintf(" 2: Created at %s: %s\n",
+			task2CreationTime, task2)
+		if want != string(out) {
+			t.Errorf("\n\t\twant\t %q,\n\t\tgot\t\t %q", want, string(out))
+		}
+	})
 	// at this point there should be two items in the list
 	t.Run("DeleteTask", func(t *testing.T) {
 		cmd := exec.Command(cmdPath, "-del", "1")
