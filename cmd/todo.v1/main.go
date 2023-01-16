@@ -172,18 +172,18 @@ func getTask(r io.Reader, args ...string) ([]string, error) {
 
 	tasks := make([]string, 0)
 	s := bufio.NewScanner(r)
-	s.Scan()
 
 	err := s.Err()
 	if err != nil {
 		return tasks, err
 	}
 
-	if len(s.Text()) == 0 {
-		return tasks, fmt.Errorf("Task cannot be blank\n")
+	for s.Scan() {
+		if len(s.Text()) == 0 {
+			break
+		}
+		tasks = append(tasks, s.Text())
 	}
-
-	tasks = append(tasks, s.Text())
 
 	return tasks, nil
 }
