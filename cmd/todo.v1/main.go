@@ -78,6 +78,10 @@ func main() {
 		}
 
 		for _, task := range tasks {
+			if task == "" {
+				fmt.Fprintln(os.Stderr, "task cannot be blank")
+				os.Exit(1)
+			}
 			l.Add(task)
 		}
 
@@ -179,11 +183,11 @@ func getTask(r io.Reader, args ...string) ([]string, error) {
 	}
 
 	for s.Scan() {
-		if len(s.Text()) == 0 {
-			break
-		}
 		tasks = append(tasks, s.Text())
 	}
 
+	if len(tasks) == 0 {
+		return tasks, fmt.Errorf("task cannot be blank")
+	}
 	return tasks, nil
 }
