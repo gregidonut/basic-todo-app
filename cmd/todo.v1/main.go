@@ -25,6 +25,7 @@ func main() {
 	// usedFlag map to check for presence which is already a bool
 	flag.Bool("add", false, "Task to be included in the ToDo list")
 	flag.Bool("list", false, "List all tasks")
+	flag.Bool("verbose", false, "shows completed or created date")
 
 	complete := flag.Int("complete", 0, "Item to be completed")
 	deletedItem := flag.Int("del", 0, "Item to be deleted")
@@ -51,7 +52,7 @@ func main() {
 	// Decide what to do based on the flag used
 	switch {
 	case usedFlag["list"]:
-		listToDoItems(l)
+		listToDoItems(l, usedFlag["verbose"])
 	case usedFlag["complete"]:
 		// Complete the given item
 		err := l.Complete(*complete)
@@ -101,9 +102,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+	case usedFlag["verbose"]:
+		listToDoItems(l, true)
 	case len(os.Args) == 1:
 		// no arguments provided
-		listToDoItems(l)
+		listToDoItems(l, false)
 	default:
 		// Invalid flag provided
 		fmt.Fprintln(os.Stderr, "Invalid option")
@@ -113,12 +116,30 @@ func main() {
 
 // extracting this logic to make switch statement more readable
 // by minimizing indents
-func listToDoItems(l *basic_todo_app.List) {
+func listToDoItems(l *basic_todo_app.List, verbose bool) {
 	// List current to do items if itemsList is not empty
 	if len(*l) <= 0 {
 		fmt.Println("You have no to do items")
 		os.Exit(0)
 	}
+	if verbose {
+		formatted := ""
+		for k, t := range *l {
+			prefix := " "
+			if t.Done {
+				prefix = "X "
+				formatted += fmt.Sprintf("%s%d: Completed at %s : %s\n",
+					prefix, k+1, t.CompletedAt.Format("Mon, 02 Jan 2006 3:04PM"), t.Task)
+				continue
+			}
+			formatted += fmt.Sprintf("%s%d: Created at %s: %s\n",
+				prefix, k+1, t.CreatedAt.Format("Mon, 02 Jan 2006 3:04PM"), t.Task)
+		}
+
+		fmt.Print(formatted)
+		return
+	}
+
 	fmt.Print(l)
 }
 

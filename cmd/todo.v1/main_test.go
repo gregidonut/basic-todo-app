@@ -156,6 +156,7 @@ func TestTodoCLI(t *testing.T) {
 		cmd := exec.Command(cmdPath, "-verbose")
 		out, err := cmd.CombinedOutput()
 		if err != nil {
+			fmt.Println(string(out))
 			t.Fatal(err)
 		}
 		want := fmt.Sprintf("X 1: Completed at %s : %s\n 2: Created at %s: %s\n",
