@@ -234,6 +234,43 @@ func TestTodoCLI(t *testing.T) {
 		}
 	})
 
+	// at this point there should be one item in the list
+	t.Run("AddNewTaskFromMultiLineSTDIN", func(t *testing.T) {
+		multilineInput := "task number 3\ntask number 4\ntask number 5\n"
+
+		cmd := exec.Command(cmdPath, "-add")
+		cmdStdIn, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		io.WriteString(cmdStdIn, multilineInput)
+		cmdStdIn.Close()
+
+		err = cmd.Run()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// listing items here to check should be task number 2 through 3
+		cmd = exec.Command(cmdPath)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		formattedMultlineInputSlice := strings.Split(multilineInput, "\n")
+		var formattedMultlineInputString string
+		for i, v := range formattedMultlineInputSlice[:len(formattedMultlineInputSlice)-1] {
+			formattedMultlineInputString += fmt.Sprintf(" %d: %s\n", i+2, v)
+		}
+		want := fmt.Sprintf(" 1: %s\n%s", task2, formattedMultlineInputString)
+		if want != string(out) {
+			t.Errorf("\nwant \t\t%q, \ngot \t\t%q", want, string(out))
+		}
+
+	})
+
 	t.Run("RunAppWithEnvVarTODO_FILENAME", func(t *testing.T) {
 		const TODO_FILENAME = "new-todo.json"
 
